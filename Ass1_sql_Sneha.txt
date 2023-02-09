@@ -1,0 +1,511 @@
+--DEPT TABLE--
+
+create table Dept(
+Dno varchar2(3) CONSTRAINTS Dept_Primary Primary key CONSTRAINTS Check_no check (Dno like 'D%'),
+Dname varchar2(10) unique);
+
+--PROJECT TABLE
+
+create table Projects(
+Dno varchar2(3)  not null references DEPT(Dno),
+Prj_no varchar2(5)  not null CONSTRAINT check_Prj_no check(Prj_no like'P%'),
+Prj_Name varchar2(10),
+Prj_Credits number(2) CONSTRAINT check_Prj_credits check (Prj_credits between 1 and 10), 
+Start_date  date,
+End_date date,
+CONSTRAINT check_Date check(End_date>Start_date),
+CONSTRAINT MakePrimary primary key(Dno,Prj_no));
+
+--EMP TABLE
+
+create table Emp(  
+Eno number(4) primary key,  
+Ename varchar2(10),  
+Ejob  varchar2(9) default 'CLRK' CONSTRAINT check_Ejob check (Ejob in('CLRK','MGR','AMGR','GM','CEO')),  
+Migr_id number(4) references EMP(Eno),  
+Birth_Date date,  
+Sal number(7,2)  default 20001 CONSTRAINTS check_Sal check (Sal>20000) ,  
+Comm number(7,2) default 1000,  
+Dept_no varchar2(3)  references Dept(Dno),  
+Prj_id varchar2(9) default 'CLRK' CONSTRAINT check_Prj_id check (Prj_id in('CLRK','MGR','AMGR','GM','CEO')),
+Date_of_join date,
+CONSTRAINT Check_Birth_Date check (Birth_Date < Date_of_join));
+
+--adding a new column
+alter table Dept add(Locations varchar2(9));
+alter table Dept add CONSTRAINTS Check_Locations Check(Locations in('BNG','MNG','MUB','HYD','CHN'));    
+alter table Dept modify Locations default 'BNG';
+
+Alter table Emp modify (Ejob varchar2(5));
+-- droping constraints
+alter table Emp drop CONSTRAINTS Check_Ejob; 
+alter table Emp drop CONSTRAINTS Check_Sal;
+alter table Emp drop CONSTRAINTS Check_Birth_Date;
+alter table Emp drop CONSTRAINTS Check_Prj_id;
+
+--foreign key added
+alter table Emp add foreign key (Dept_no,Prj_id) references Projects;
+
+--Inserting values in tables
+insert into Dept values('D1','Marketing','CHN');
+insert into Dept values('D2','Research','MNG');
+insert into Dept values('D3','Administ','BNG');
+insert into Dept values('D4','Dname1','BNG');
+insert into Dept values('D5','IT','BNG');
+insert into Dept values('D*','Corporate','HYD');
+
+
+insert into Projects (Dno,Prj_no,Prj_credits) values('D1','P1',2);
+insert into Projects (Dno,Prj_no,Prj_credits) values('D2','P1',2);
+insert into Projects (Dno,Prj_no,Prj_credits) values('D3','P2',7);
+insert into Projects (Dno,Prj_no,Prj_credits) values('D1','P3',5);
+insert into Projects (Dno,Prj_no,Prj_credits) values('D4','P2',7);
+
+
+
+
+
+insert into Emp values(150,'Jaitra','CEO',null,'10-december-1970',60000,30000,null,null,'3-december-1990');
+insert into Emp values(111,'Raghu','GM',150,'10-december-1974',45000,15000,null,null,'3-december-1985');
+insert into Emp values(125,'Manu','A.MGR',150,'10-december-1980',null,null,'D4','P2','2-october-2002');
+insert into Emp values(100,'Ravi','MGR',111,'10-october-1985',32000,null,'D1','P1','2-october-2001');
+insert into Emp values(102,'Raviraj','CLRK',100,'10-december-1980',24000,null,'D1','P3','12-november-2000');
+insert into Emp values(104,'Pratik','CLRK',100,'2-december-1980',null,null,'D2','P1','2-october-2005');
+insert into Emp values(106,null,'MGR',100,'2-october-1986',null,null,'D2',null,'2-october-1985');
+insert into Emp values(123,'Mahesh','CLRK',106,'10-december-1974',25000,null,'D3','P2','2-october-2002');
+insert into Emp values(103,'Rajdip','CLRK',111,'2-october-1980',null,null,'D1','P3','2-october-2002');
+
+-- Some Error occurs, so changes have done to insert  values
+insert into Emp values(105,null,'CLRK',111,'10-december-1980',null,null,'D1','P1','2-october-2001');
+insert into Emp values(107,'Aniket','CLRK',111,'10-december-1980',null,null,'D1','P3','2-october-2001');
+insert into Emp values(108,null,'CLRK',106,'10-december-1970',null,null,'D5',null,'2-october-1985');
+insert into Emp values(109,null,'CLRK',106,'10-december-1980',18000,null,null,null,'10-december-1980');
+
+
+select  * from Emp;
+select * from Dept;
+select * from Projects;
+
+drop table DEPT;
+drop table PROJECTS;
+drop table EMP;
+
+
+       -----set:1
+
+
+--1. Display all records from EMP,DEPT and PROJECTS table
+
+select * from EMP;
+select * from DEPT;
+select * from PROJECTS;
+
+
+--2. Display records of Employees who have salary more than 25000 or working in department D2
+select * from Emp where Sal>25000 or Dept_no='D2';
+
+--3. Update the DNO of first record in PROJECTS to D5, confirm the result with reason.
+update Dept set Dno='D5';
+--Can not update because Dno of Dept table is unique attribute
+
+--4. Update the Job of employee with EmpNo 123 to MGR, salary to 35000 and his manager as 111.
+update Emp set Ejob='MGR', sal=35000 , Migr_id=111 where Eno=123;
+
+--5. List all employee names and their salaries, whose salary lies between 25200/- and 35200/- both inclusive.
+select Ename,Sal from Emp  where Sal between 25200 and 35200;
+
+--6. List all employee names reporting to employees 100,125,150
+select Ename from Emp where Eno in(100,125,150);
+
+--7. List all employees whose name starts with either M or R.
+select Ename from Emp where (Ename like 'M%') or (Ename like 'R%');
+
+--8. List the name of employees whose name do not starts with M.
+select Ename from Emp where (Ename  not like 'M%'); 
+
+--9. List all kind jobs available in employee table, avoid displaying duplicates.
+select distinct Ejob from Emp;
+
+--10. List minimum, maximum, average salaries in company.
+select min(Sal),max(Sal),avg(Sal) from Emp;
+
+--11. Display the number of employees working in each project.
+Select count(*),Prj_id from Emp  group by Prj_id;
+
+--12. List the Employees name and their manager’s names
+select E.Ename as "Employee" , M.Ename as "their manager" from Emp E ,Emp M where E.Eno=M.Migr_id;
+
+--13. List Employees Name, their department name and Projects Name in which they are working.
+
+select E.Ename,D.Dname,P.Prj_name from Emp E, Dept D, Projects P where E.Dept_no=D.Dno and E.Dept_no=P.Dno;
+
+--14. List the employee names, salary of employees whose first character of name is R, 2nd and 3rd characters are ‘v’,’i’ and remaining characters are unknown.
+select Ename,Sal from Emp where Ename like 'Rvi%';
+
+
+
+--SET-II
+
+select * from EMP;
+select * from DEPT;
+
+select count(*),Prj_no  from  projects group by Prj_no having count(*)>1;
+
+--1. List the Projects name undertaken by Marketing Department.
+select Prj_no from projects where Dno in(select Dno from Dept where Dname='Marketing');
+
+--2. Display current date, 53, absolute value of -45 and current date as date with format MONTH-YY.
+
+--3. Display the employees name and salary in descending order by salary.
+select Ename,Sal from Emp order by sal desc;
+
+--4. List the name of departments which are working with more than 1 project
+select Dname from Dept where Dno in(select Dno from  projects group by Dno having count(*) >1);
+
+--5. Display department name, Max salary and Min salary in each department.
+select Dname as "Department Name" ,Max(Sal) as "Maximum Salary",Min(Sal) as"Minimum Salary" from Dept left join Emp on Dept.Dno=Emp.Dept_no group by Dname;
+
+--6. List the employees whose experience is more than 5 years.
+select Ename,(EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATE_OF_JOIN)) AS "EXPERIENCE" from Emp where (EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATE_OF_JOIN))>=5;
+--7. List the Employees number, Name and their Age and retirement date(assume 60 years retirement age).
+
+SELECT Eno,Ename,(EXTRACT (YEAR FROM SYSDATE)-EXTRACT(YEAR FROM BIRTH_DATE)) AS "AGE",(EXTRACT(YEAR FROM BIRTH_DATE)+60) AS "Retirement_Date" FROM EMP;
+
+--8. List the Employees who born on December month.
+SELECT ENAME FROM EMP WHERE TO_DATE(BIRTH_DATE,'DD-MON-YYYY') LIKE '%DEC%';
+
+--9. List the Employees names who born on a given year.
+SELECT ENAME FROM EMP WHERE EXTRACT(YEAR FROM BIRTH_DATE)=1980;
+
+--10. List the Employees names who joined on day 12.
+SELECT ENAME FROM EMP WHERE EXTRACT(DAY FROM DATE_OF_JOIN) LIKE '12';
+--11. List the Employees names having service experience more than 10 years.
+select Ename,(EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATE_OF_JOIN)) AS"EXPERIENCE" from Emp where (EXTRACT(YEAR FROM SYSDATE)-EXTRACT(YEAR FROM DATE_OF_JOIN))>10;
+
+--12. List the projects which have duration more than 1 year.
+SELECT PRJ_NO FROM PROJECTS WHERE (EXTRACT(YEAR FROM END_DATE)-EXTRACT(YEAR FROM START_DATE))>1;
+
+
+-- 13. List the Employees Name who is working at Locations (BNG,MUB,HYD)
+
+SELECT E1.ENAME FROM EMP E1 , DEPT D1 WHERE  E1.DEPT_NO=D1.DNO AND D1.LOCATIONS IN ('BNG','MUB','HYD');
+
+-- 14. Update the COMM column of EMP table based on the SAL. Use COMM=CMM+SAL*10/100
+
+UPDATE EMP SET COMM =(COMM+((SAL*10)/100));
+SELECT ENAME,COMM FROM EMP;
+
+-- 15. List employee names, padded to right with a series of three periods and space up to a width of 30, 
+-- and project credits of projects in which they are working.(Use RPAD,LPAD)
+
+SELECT RPAD(ENAME,30,'...') AS EMP_NAME,PRJ_CREDITS FROM EMP,PROJECTS WHERE EMP.PRJ_ID = PROJECTS.PRJ_NO AND EMP.DEPT_NO = PROJECTS.DNO;
+
+-- 16. List the name of employees who are working in project with credit more than 7 and display
+-- name with only first letter capital and replace the character ‘a’(if present) in the name by ‘$’.
+SELECT DISTINCT REPLACE(INITCAP(ENAME),'a','$') AS ENAME FROM EMP E1,PROJECTS P1 WHERE P1.PRJ_CREDITS>=7 AND E1.PRJ_ID=P1.PRJ_NO ;
+
+-- 17. Display department Name and Total amount spent on each department by the company as Salary.
+SELECT DNAME AS "DEPT_NAME" ,SUM(SAL) AS "TOTAL SALARY" FROM DEPT D1,EMP E1 WHERE E1.DEPT_NO=D1.DNO GROUP BY DNAME;
+
+
+-- SET-III
+
+select * from Dept;
+select * from Projects;
+select * from Emp;
+
+
+
+-- 1. List Job category and total salary paid for the each jobs category by the company.
+
+SELECT EJOB AS "JOB",SUM(SAL) AS "TOTAL SALARY PAID" FROM EMP GROUP BY EJOB;
+
+-- 2. Display name of the department from which maximum number of employees are working on project P1.
+ 
+SELECT DISTINCT D.DNAME FROM DEPT D,PROJECTS P,EMP E WHERE (D.DNO,E.PRJ_ID) IN
+(SELECT e.DEpt_no ,E.PRJ_ID FROM DEPT D,PROJECTS P,EMP E WHERE D.DNO=P.DNO   AND P.PRJ_NO=E.PRJ_ID  AND E.PRJ_ID='P1'  GROUP BY (e.dept_no,E.PRJ_ID)  ORDER BY E.PRJ_ID FETCH  FIRST ROW ONLY);
+
+
+SELECT * FROM (SELECT D1.DNAME,COUNT(*) AS NO_OF_EMP_IN_P1 FROM EMP E1,DEPT D1,PROJECTS P1 
+WHERE E1.DEPT_NO = D1.DNO AND E1.PRJ_ID = P1.PRJ_NO AND D1.DNO = P1.DNO AND P1.PRJ_NO='P1' 
+GROUP BY D1.DNAME ORDER BY NO_OF_EMP_IN_P1 DESC) WHERE ROWNUM=1;
+
+
+-- 3. Display department names and number of CLRK working in the departments.
+
+SELECT DNAME ,COUNT(EJOB) AS "CLRK WORKING" FROM DEPT D1 ,EMP E1 WHERE D1.DNO=E1.DEPT_NO  AND EJOB='CLRK' GROUP BY DNAME;--ORDER BY (DNAME,EJOB)
+
+
+
+-- 4. Display Employee names who are not working in any of the projects.
+SELECT ENAME FROM EMP WHERE PRJ_ID IS NULL
+
+-- 5. Create a View EMP_PRJ_VW to display records of employees of ‘marketing’ department and project in which they are working.
+
+CREATE VIEW EMP_PRJ_VW AS SELECT  * FROM EMP E1, PROJECTS P1 WHERE (DEPT_NO,PRJ_ID) IN
+(SELECT D1.DNO ,P1.PRJ_NO FROM DEPT D1, PROJECTS P1 WHERE  D1.DNO=P1.DNO AND D1.DNAME='Marketing') AND E1.PRJ_ID=P1.PRJ_NO AND P1.DNO=E1.DEPT_NO;
+
+SELECT * FROM EMP_PRJ_VW;
+--DROP VIEW  EMP_PRJ_VW;
+
+-- 6. Display employee names and projects in which they are working using View EMP_PRJ_VW
+
+SELECT ENAME,PRJ_ID FROM EMP_PRJ_VW;
+
+-- 7. Create an unique index on the column name DNAME on DEPT table
+
+CREATE UNIQUE INDEX DNAME_UNDEX ON DEPT(DNAME);
+
+-- NOT POSSIBLE BECAUSE OF PRIMARY KEY DNO
+
+-- 8. Create an index on the columns (name and job) on EMP table.
+
+CREATE INDEX MULTI_COL_INDEX ON EMP(ENAME,EJOB);
+-- 9. Create a Sequence STUD_SEQ which starts from 100 to 999 with increments of 3.
+
+CREATE SEQUENCE STUD_SEQ
+    INCREMENT BY 3
+    START WITH 100
+    MINVALUE 100
+    MAXVALUE 999
+    CYCLE
+    CACHE 2;
+
+-- 10. Create a table STUD with columns ROLLNO and Name. Insert ROLLNO values by taking values from STUD_SEQ.
+
+CREATE TABLE STUD(
+ROLLNO NUMBER DEFAULT STUD_SEQ.NEXTVAL,
+NAME VARCHAR2(20)
+);
+
+-- 11. Display Location of department and Employees name working in Marketing department or Research (using set operator).
+
+SELECT E1.ENAME,D1.LOCATIONS FROM EMP E1,DEPT D1 WHERE E1.DEPTNO = D1.DNO AND D1.DNAME ='Marketing'
+UNION
+SELECT E2.ENAME,D2.LOCATIONS FROM EMP E2,DEPT D2 WHERE E2.DEPTNO = D2.DNO AND D2.DNAME ='Research';
+
+-- 12. Display the names of the Departments undertaking both projects P1 and P3 (using set operator).
+
+SELECT D1.DNAME FROM DEPT D1,PROJECTS P1 WHERE P1.DNO = D1.DNO AND P1.PRJ_NO = 'P1'
+INTERSECT
+SELECT D2.DNAME FROM DEPT D2,PROJECTS P2 WHERE P2.DNO = D2.DNO AND P2.PRJ_NO = 'P3';
+
+
+
+-- SET-IV
+
+
+
+-- 1. Display the details of those who do not have any person working under them?
+
+
+
+SELECT M.ENAME FROM EMP E,EMP M WHERE M.ENO = E.MIGR_ID GROUP BY M.ENAME HAVING COUNT(*)=0; 
+
+-- 2. Display those who are not managers and who are managers any one?
+
+SELECT E.ENAME FROM EMP E WHERE E.ENO NOT IN
+(SELECT M.ENAME FROM EMP E ,EMP M WHERE M.ENO= E.MIGR_ID );
+
+SELECT E2.ENAME FROM EMP E1,EMP E2 WHERE E2.ENO = E1.MIGR_ID GROUP BY E2.ENAME HAVING COUNT(*) IN(0,1); 
+
+-- 3. Display those employees whose salary is more than 30000 after giving 20% increment?
+
+SELECT ENAME ,SAL*1.2 AS SALARY FROM EMP WHERE (SAL*1.2)>=30000;
+
+-- 4. Display the name,monthly salary,daily salary and Hourly salary for employees.Assume that the Sal column in the table is the monthly 
+--salary,that there are 22 working days in a month,and that there are 8 working hours in a day.Rename the columns as monthly,daily and hourly.
+
+SELECT ENAME,SAL AS MONTHLY_SAL,(SAL/22) AS DAILY_SAL,(SAL/(22*8)) AS HOURLY_SAL FROM EMP;
+
+-- 5. Display employee name, dept name, salary and comm. For those sal in between 20000 to 50000 while location is CHN?
+
+SELECT ENAME,DNAME,SAL,COMM FROM EMP JOIN DEPT ON DEPT_NO=DNO AND LOCATIONS='CHN' AND SAL>=20000 AND SAL<=50000;
+
+-- 6. Display those employees whose salary is greater than his manager salary?
+
+SELECT E1.ENAME FROM EMP E1 ,EMP E2 WHERE E2.ENO = E1.MIGR_ID AND  E1.SAL>E2.SAL;
+
+SELECT E1.ENAME FROM EMP E1 WHERE E1.SAL>(SELECT E2.SAL FROM EMP E2 WHERE E2.ENO = E1.MIGR_ID);
+
+-- 7. Display those employees who are working in the same dept where his manager is working?
+
+SELECT E1.ENAME FROM EMP E1,EMP E2 WHERE E2.ENO = E1.MIGR_ID and E1.DEPT_NO=E2.DEPT_NO; 
+
+-- 8. Display employees name for the dept no D1 or D3 while joined the company before 31-dec-82?
+
+SELECT ENAME FROM EMP E1,DEPT D1 WHERE E1.DEPTNO = D1.DNO AND DNO IN('D1','D3') AND E1.DATE_OF_JOIN<'31-DEC-82';
+
+-- 9. Update the salary of each employee by 10% increment who are not eligible for commission?
+
+SELECT ENAME,SAL,COMM FROM EMP;
+UPDATE EMP SET SAL = SAL*1.1 WHERE COMM IS NULL;
+SELECT ENAME,SAL FROM EMP;
+
+-- 10. Find out the top 3 earners of the company?
+
+SELECT ENAME FROM EMP ORDER BY SAL DESC FETCH FIRST 3 ROWS ONLY;
+
+-- 11. Display name of those employees who are getting the highest salary in their department.
+
+SELECT ENAME,DEPT_NO FROM EMP WHERE (DEPT_NO,SAL) IN(SELECT DEPT_NO,MAX(SAL) FROM EMP E1 JOIN DEPT D1 ON E1.DEPT_NO=D1.DNO GROUP BY DEPT_NO);
+
+-- 12. Select count of employees in each department where count greater than 3?
+
+SELECT DEPTNO,COUNT(*) FROM EMP E1 JOIN DEPT D1 ON E1.DEPTNO=D1.DNO GROUP BY DEPTNO HAVING COUNT(*)>3;
+
+-- 13. Display dname where at least 3 are working and display only department name?
+
+SELECT D1.DNAME FROM EMP E1 JOIN DEPT D1 ON E1.DEPT_NO=D1.DNO GROUP BY D1.DNAME HAVING COUNT(*)>=3;
+
+-- 14. Display those managers name whose salary is more than average salary of his employees?
+
+
+  SELECT DISTINCT M.ENAME FROM EMP M, EMP E WHERE  E.MIGR_ID=M.ENO
+  AND M.SAL > (SELECT AVG(E.SAL) FROM EMP E WHERE E.MIGR_ID=M.ENO);
+
+
+  SELECT M.ENAME FROM EMP M WHERE M.ENO IN
+  (SELECT MIGR_ID FROM EMP) AND M.SAL > (SELECT AVG(E.SAL) FROM EMP E WHERE E.MIGR_ID=M.ENO);
+
+-- 15. Display those employees whose salary is odd value?
+
+SELECT ENAME FROM EMP WHERE MOD(SAL,2) != 0;
+
+-- 16. List of employees who do not get any commission.
+
+SELECT ENAME FROM EMP WHERE COMM IS NULL;
+
+-- 17. Display those employees whose salary contains atleast 3 digits?
+
+SELECT ENAME FROM EMP WHERE  SAL>=100;
+
+SELECT ENAME FROM EMP WHERE LENGTH(TRIM(TO_CHAR(SAL,'9999')))>=3;
+
+-- 18. Delete those employees who joined the company 10 years back from today?
+
+SELECT * FROM EMP WHERE (SYSDATE-DATE_OF_JOIN)=10;
+
+-- 19. Display the name of employees who joined on the same date?
+
+SELECT E1.ENAME 
+FROM EMP E1 
+WHERE DATE_OF_JOIN IN
+(SELECT DATE_OF_JOIN 
+FROM EMP E2 
+WHERE E1.ENO!=E2.ENO); 
+
+-- 20. Display the manager who is having maximum number of employees working under him?
+
+SELECT E2.ENAME,COUNT(*) AS TOTAL FROM EMP E1,EMP E2 WHERE E2.ENO = E1.MIGR_ID 
+GROUP BY E2.ENAME
+ORDER BY TOTAL DESC
+FETCH FIRST 1 ROW ONLY;
+
+
+							--SET-V
+
+--1. Print a list of employees displaying “Just Salary” if more than 25000 if exactly 25000 display “On target” if less ‘Below target’?
+
+SELECT ENAME,(CASE WHEN SAL>25000 THEN 'JUST SALARY' WHEN SAL=25000 THEN 'ON TARGET' WHEN SAL<25000 THEN 'BELOW TARGET' END) AS SALCOND 
+FROM EMP;
+
+--2. Define a variable representing the expression used to calculate on employees total Annual Remuneration.
+
+SELECT EMP.*, SAL*12 ANNUAL_RENUMERATION
+FROM EMP;
+
+--3. List out the lowest paid employees working for each manager; exclude any groups where minimum salary is less than Rs.25000. Sort the output by salary?
+
+SELECT ENAME,MIGR_ID,SAL
+FROM EMP
+WHERE SAL IN (SELECT MIN(SAL)
+FROM EMP
+GROUP BY MIGR_ID)AND SAL>25000
+ORDER BY SAL;
+
+--4. Find out the all employees who joined the company before their managers?
+
+SELECT E.ENAME,E.DATE_OF_JOIN,E.MIGR_ID
+FROM EMP E,EMP M
+WHERE E.MIGR_ID=M.ENO AND E.DATE_OF_JOIN<M.DATE_OF_JOIN;
+
+--5. List out the all employees by name and number along with their manager’s name and number; also display “KING” who has no manager?
+
+SELECT A.ENO AS EMPLOYEE_ID,A.ENAME AS EMPLOYEE,M.ENO AS MANAGER_ID,M.ENAME AS MANAGER
+FROM EMP A,EMP M 
+WHERE A.MIGR_ID=M.ENO(+);
+
+--6. Find out the employees who earn the highest salary in each job type. Sort in descending salary order?
+
+SELECT ENAME,SAL
+FROM EMP 
+WHERE SAL IN (SELECT MAX(SAL) FROM EMP GROUP BY EJOB)
+ORDER BY SAL DESC;
+
+--7. Find out the employees who earn the minimum salary for their job in ascending order?
+
+SELECT ENAME,SAL
+FROM EMP
+WHERE SAL IN (SELECT MIN(SAL) FROM EMP GROUP BY EJOB)
+ORDER BY SAL ASC;
+
+--8. In which year did most people join the company. Display the year and number of employees?
+
+SELECT TO_CHAR(DATE_OF_JOIN,'YYYY') AS YEAR, COUNT(ENO) AS NO_OF_EMPLOYEES
+FROM EMP 
+GROUP BY TO_CHAR(DATE_OF_JOIN,'YYYY') 
+HAVING COUNT(ENO) = (SELECT MAX(COUNT(ENO)) 
+FROM EMP GROUP BY TO_CHAR(DATE_OF_JOIN,'YYYY'));
+
+--9. Display average salary figure for the department?
+
+SELECT DEPT_NO,AVG(SAL) AS AVERAGE_SALARY 
+FROM EMP
+GROUP BY DEPT_NO;
+
+--10. Display employees who can earn more than lowest salary in department no 30?
+
+SELECT ENAME,SAL
+FROM EMP
+WHERE SAL>(SELECT MIN(SAL)
+FROM EMP
+WHERE DEPT_NO='D1');
+
+--11. Display the half of the ename’s in upper case & remaining lower case?
+
+SELECT ENAME,UPPER (SUBSTR (ENAME, 1, ROUND (LENGTH (ENAME) / 2)))|| 
+LOWER (SUBSTR (ENAME, ROUND (LENGTH (ENAME) / 2) + 1, LENGTH (ENAME))) AS NEW_NAME
+FROM emp;
+
+--12. Create a copy of emp table without any data(records)
+
+CREATE TABLE EMP1 AS SELECT * FROM EMP WHERE 1=0;
+
+--13. List the details of the employees in Departments D1 and D2 in alphabetical order of Name.
+
+SELECT * 
+FROM EMP
+WHERE DEPT_NO IN ('D1','D2')
+ORDER BY ENAME;
+
+--14. List all rows from Emp table, by converting the null values in comm Column to 0.
+
+SELECT COALESCE(COMM, 0 )
+FROM EMP;
+
+--15. Give SQL command to find the average salary per job in each Dept.
+
+SELECT DEPT_NO,EJOB,AVG(SAL)
+FROM EMP
+GROUP BY DEPT_NO,EJOB;
+
+--16. Find the job with the highest average salary.
+
+SELECT EJOB,SAL
+FROM 
+(SELECT EJOB,AVG(SAL) AS SAL
+FROM EMP
+GROUP BY EJOB) a
+ORDER BY SAL DESC
+FETCH FIRST 1 ROWS ONLY;
