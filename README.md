@@ -1,2 +1,2 @@
 # SQL
-SQL Assignments
+SQL with Qn and Ans
